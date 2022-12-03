@@ -13,6 +13,7 @@ var textBg = new Image();
 var goBackButton = new Image();
 var restartButton = new Image();
 var fullBlackBg = new Image();
+var winnerScreen = new Image();
 
 //loading images
 monster.src = "img/monster.png";
@@ -24,6 +25,7 @@ textBg.src = "img/textBg.png";
 goBackButton.src = "img/goBackButton.png";
 restartButton.src = "img/restartButton.png";
 fullBlackBg.src = "img/fullBlackBg.png";
+winnerScreen.src = "img/winnerScreen.png";
 bg.src = "img/bg2.png"; 
 
 
@@ -33,6 +35,7 @@ function drawDefaultRoom(){
     clearCvs();
     ctx.drawImage(bg,0,0);
     ctx.drawImage(knight,(cvs.clientWidth-knight.width)/2, (cvs.clientHeight-knight.height)/2);
+    drawHeroPower(heroPower);
 }
 
 function drawBattleRoom(roomID){
@@ -40,14 +43,14 @@ function drawBattleRoom(roomID){
     ctx.drawImage(battleRoom, 0, 0)
     ctx.drawImage(textBg, 0, 650)
     if (roomObjects[roomID].objectID == "monster"){
-        ctx.drawImage(roomMonster, (cvs.clientWidth-roomMonster.width)/2, (cvs.clientHeight-roomMonster.height)/2+50)
-        drawGoBackButton();
+        ctx.drawImage(roomMonster, (cvs.clientWidth-roomMonster.width)/2, (cvs.clientHeight-roomMonster.height)/2+50);
+        drawEnemyPower(roomObjects[roomID].power, "red")
     }
     else if (roomObjects[roomID].objectID == "rock"){
-        ctx.drawImage(rock, (cvs.clientWidth-rock.width)/2, (cvs.clientHeight-rock.height)/2+50)
-        drawGoBackButton();
+        ctx.drawImage(rock, (cvs.clientWidth-rock.width)/2, (cvs.clientHeight-rock.height)/2+50);
+        drawEnemyPower(roomObjects[roomID].power, "blue")
     }
-    
+    drawGoBackButton();
 }
 
 function showGameOverScreen(){
@@ -55,19 +58,64 @@ function showGameOverScreen(){
     ctx.drawImage(restartButton, (cvs.clientWidth-restartButton.width)/2, (cvs.clientHeight-restartButton.height)/2)
 }
 
+function showWinnerScreen(){
+    ctx.drawImage(winnerScreen, 0, 0);
+}
+
 function drawGoBackButton(){
     console.log("drawingButton")
     ctx.drawImage(goBackButton, cvs.clientWidth-goBackButton.width,  cvs.clientHeight-goBackButton.height)
 }
 
-function printText(line1, line2, line3){
+function drawEnemyPower(power, color){
+    ctx.font = '30px "Comic Sans MS", "Comic Sans", cursive';
+    ctx.fillStyle = color;
+    ctx.textAlign = "center";
+    ctx.fillText("Сила: " + power, cvs.width/2, cvs.height/2-100);
+}
+
+function drawHeroPower(power){
+    ctx.font = '30px "Comic Sans MS", "Comic Sans", cursive';
+    ctx.fillStyle = "lightgreen";
+    ctx.textAlign = "center";
+    ctx.fillText("Сила: " + power, cvs.width/2, cvs.height/2-100);
+}
+
+function printRockText(line1, line2, line3){
     ctx.font = '20px "Comic Sans MS", "Comic Sans", cursive';
+    ctx.textAlign = "left";
+    ctx.fillStyle = "white"
+
+    ctx.fillText(line1, 50, 680)
+    ctx.fillText(line2, 50, 710)
+    ctx.fillStyle = "lightgreen";
+    ctx.fillText(line3, 50, 740)
+}
+
+function printWinText(line1, line2, line3, line4){
+    ctx.font = '20px "Comic Sans MS", "Comic Sans", cursive';
+    ctx.textAlign = "left";
     ctx.fillStyle = "white"
 
     ctx.fillText(line1, 50, 680)
     ctx.fillText(line2, 50, 710)
     ctx.fillText(line3, 50, 740)
+    ctx.fillStyle = "lightgreen";
+    ctx.fillText(line4, 50, 770)
 }
+
+function printText(line1, line2, line3, line4, color){
+    ctx.fillStyle = "white"
+    ctx.font = '20px "Comic Sans MS", "Comic Sans", cursive';
+    ctx.textAlign = "left";
+    ctx.fillText(line1, 50, 680)
+    ctx.fillText(line2, 50, 710)
+    ctx.fillStyle = color
+    ctx.fillText(line3, 50, 740)
+    ctx.fillStyle = "white"
+    ctx.fillText(line4, 50, 770)
+}
+
 
 // function testFunction(){
     
@@ -86,7 +134,8 @@ bg.onload = drawDefaultRoom;
 let heroPower = 25;
 let roomObjects = new Array;
 let inBattle = false;
-let gameOver = false;
+let gameOver = 0;
+let playerScore = 0; //счётчик прошедших комнат, если 10 - победа.
 
 //Сейчас кнопка двери не совпадает с размерами самой двери.
 //Можно сделать более точную кнопку.
@@ -164,6 +213,17 @@ doorCoords.push({
 })
 
 
+function restart(){
+    clearCvs();
+    drawDefaultRoom();
+    heroPower = 25;
+    roomObjects = new Array;
+    inBattle = false;
+    gameOver = 0;
+    userScrore = 0;
+    generateRooms();
+}
+
 //generating rooms
 function generateRooms(){
     for (let i = 0; i < 10; i++){
@@ -218,6 +278,15 @@ function clickedOnGoBackButton(e) {
         ) return true;
 }
 
+function clickedOnRestartButton(e){
+    if (
+        (e.pageX >= (cvs.width-restartButton.width)/2) &&
+        (e.pageX <= (cvs.width+restartButton.width)/2) &&
+        (e.pageY >= (cvs.height-restartButton.height)/2) &&
+        (e.pageY <= (cvs.height+restartButton.height)/2)
+        ) return true;
+}
+
 function onGoBackButtonClick() {
     clearCvs();
     drawDefaultRoom();
@@ -227,37 +296,56 @@ function onGoBackButtonClick() {
 function battle(doorID){
     if (roomObjects[doorID].objectID == "rock") {
         heroPower += roomObjects[doorID].power
-        let line1 = `*За дверью оказался артефакт.`
+        let line1 = `*За дверью оказался древний артефакт.`
         let line2 = `*Вы подобрали артефакт.`
         let line3 = `*Ваша сила увеличена на ` + roomObjects[doorID].power+"."
-        printText(line1, line2, line3);
+        let line4 = ""
+        printRockText(line1, line2, line3);
+        playerScore+=1;
     }
     else if (roomObjects[doorID].objectID == "monster") {
         if (roomObjects[doorID].power > heroPower){
-            let line1 = `*За дверью оказался монстр.`
-            let line2 = `*Монстр выглядит сильнее вас.`
-            let line3 = `*Вы не смогли одолеть монстра. Игра окончена.`
-            printText(line1, line2, line3);
-            gameOver = true;
+            let line1 = `*За дверью притаился монстр.`
+            let line2 = `*Монстр кажется сильнее вас.`
+            let line3 = `*Сила героя равна ` + heroPower +`, но этого было недостаточно`
+            let line4 = `*Вы не смогли одолеть монстра. Игра окончена.`
+            printText(line1, line2, line3, line4, "red");
+            gameOver = 1;
             //Добавь проверку конца игры
         }
         else if (roomObjects[doorID].power <= heroPower){
-        // heroPower += roomObjects[doorID].power
+            heroPower += 10
             let line1 =  `*За дверью оказался монстр.`
             let line2 = `*К счастью, вы сильнее, чем он.`
-            let line3 = `*Вы одолели монстра. Ваша сила увеличена на ` + roomObjects[doorID].power+"."
-            printText(line1, line2, line3);
+            let line3 = `*Вы одолели монстра. Ваша сила увеличена на 10.`
+            let line4 = `Теперь сила героя равна ` + heroPower
+            printWinText(line1, line2, line3, line4);
+            playerScore+=1;
         }
+    } else {
+        let line1 = `*Лишь одинокая лампа стоит в углу.`
+        let line2 = `*Вы припоминаете, что уже были здесь.`
+        let line3 = `*...`
+        let line4 = ""
+        printText(line1, line2, line3, line4);
     }
-
-    
+    roomObjects[doorID] = 0
 }
 
 
 
 function handleClick(e){
-    if (gameOver){
-        showGameOverScreen()
+    if (gameOver == 1) {
+        showGameOverScreen();
+        gameOver = 2;
+    } else if (gameOver == 2) {
+        if (clickedOnRestartButton(e)){
+        console.log("restarting...")
+            restart();
+        }
+    } else if (playerScore == 10) {
+        console.log("playerWon")
+        showWinnerScreen();
     } else if (!inBattle) {
         if(clickedDoorID(e) !== undefined){
                 drawBattleRoom(clickedDoorID(e))
@@ -268,8 +356,8 @@ function handleClick(e){
         if  (clickedOnGoBackButton(e)) {
             onGoBackButtonClick()
         }
+    } 
     }
-}
 
 //autoexec
 generateRooms();

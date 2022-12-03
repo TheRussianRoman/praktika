@@ -8,13 +8,18 @@ var battleRoom = new Image();
 var monster = new Image();
 var roomMonster = new Image();
 var knight = new Image();
+var rock = new Image();
+var textBg = new Image();
 
 //loading images
 monster.src = "img/monster.png";
 roomMonster.src = "img/roomMonster.png";
 knight.src = "img/knight.png";
-battleRoom.src = "img/battleRoom.png"
+battleRoom.src = "img/battleRoom.png";
+rock.src = "img/roomRock.png";
+textBg.src = "img/textBg.png";
 bg.src = "img/bg2.png"; 
+
 
 
 //canvas code
@@ -27,8 +32,28 @@ function drawDefaultRoom(){
 function drawBattleRoom(roomID){
     clearCvs();
     ctx.drawImage(battleRoom, 0, 0)
-    if (roomObjects[roomID].objectID == "monster")
-     ctx.drawImage(roomMonster, (cvs.clientWidth-roomMonster.width)/2, (cvs.clientHeight-roomMonster.height)/2+50)
+    if (roomObjects[roomID].objectID == "monster"){
+        ctx.drawImage(roomMonster, (cvs.clientWidth-roomMonster.width)/2, (cvs.clientHeight-roomMonster.height)/2+50)
+    }
+    else if (roomObjects[roomID].objectID == "rock"){
+        ctx.drawImage(rock, (cvs.clientWidth-rock.width)/2, (cvs.clientHeight-rock.height)/2+50)
+    }
+}
+
+
+function printText(line1, line2, line3){
+    ctx.font = '20px "Comic Sans MS", "Comic Sans", cursive';
+    ctx.fillStyle = "white"
+    ctx.drawImage(textBg, 0, 650)
+
+    ctx.fillText(line1, 50, 680)
+    ctx.fillText(line2, 50, 710)
+    ctx.fillText(line3, 50, 740)
+}
+
+function testFunction(){
+    
+    ctx.fillText(`Это монстр!`, 10, 50)
 }
 
 function clearCvs () {
@@ -43,67 +68,81 @@ bg.onload = drawDefaultRoom;
 let heroPower = 25;
 let roomObjects = new Array;
 let inBattle = false;
-let doorCoords = new Array;
 
+
+//Сейчас кнопка двери не совпадает с размерами самой двери.
+//Можно сделать более точную кнопку.
+//Но это дольше
+//position of doors
+let doorCoords = new Array;
 doorCoords.push({
     xStart: 450,
     yStart: 30,
     xEnd: 560,
-    yEnd: 52
+    yEnd: 50
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 690,
+    yStart: 85,
+    xEnd: 795,
+    yEnd: 170
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 826,
+    yStart: 230,
+    xEnd: 880,
+    yEnd: 340
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 830,
+    yStart: 465,
+    xEnd: 883,
+    yEnd: 574
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 694,
+    yStart: 649,
+    xEnd: 792,
+    yEnd: 728
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 453,
+    yStart: 763,
+    xEnd: 560,
+    yEnd: 783
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 223,
+    yStart: 648,
+    xEnd: 321,
+    yEnd: 728
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 134,
+    yStart: 467,
+    xEnd: 188,
+    yEnd: 575
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 138,
+    yStart: 229,
+    xEnd: 189,
+    yEnd: 338
 })
+
 doorCoords.push({
-    xStart: 450,
-    yStart: 0,
-    xEnd: 0,
-    yEnd: 0
+    xStart: 224,
+    yStart: 86,
+    xEnd: 323,
+    yEnd: 165
 })
 
 
@@ -117,7 +156,7 @@ function generateRooms(){
         }
         if (whatToSpawn == 1) {
             roomObjects.push(spawnMonster(i));
-            console.log("Spawned " +roomObjects[i].objectID + " " + roomObjects[i].power + " in room number " + i)
+            console.log("Spawned " + roomObjects[i].objectID + " " + roomObjects[i].power + " in room number " + i)
         }
     }
 }
@@ -140,7 +179,8 @@ function spawnRock(){
     return monster;
 }
 
-function doorClick(e){
+
+function clickedDoorID(e){
     for (let i = 0; i<10; i++){
         if (
             (e.pageX >= doorCoords[i].xStart) &&
@@ -151,29 +191,54 @@ function doorClick(e){
             isDoor: true,
             doorID: i
         };
-        // else return {
-        //     isDoor: false
-        // }
     }
-
 }
+
+
+function battle(doorID){
+    if (roomObjects[doorID].objectID == "rock") {
+        heroPower += roomObjects[doorID].power
+        let line1 = `*За дверью оказался артефакт.`
+        let line2 = `*Вы подобрали артефакт.`
+        let line3 = `*Ваша сила увеличена на ` + roomObjects[doorID].power+"."
+        printText(line1, line2, line3);
+    }
+    else if (roomObjects[doorID].objectID == "monster") {
+        if (roomObjects[doorID].power > heroPower){
+            let line1 = `*За дверью оказался монстр.`
+            let line2 = `*Монстр выглядит сильнее вас.`
+            let line3 = `*Вы не смогли одолеть монстра. Игра окончена.`
+            printText(line1, line2, line3);
+
+            //Добавь проверку конца игры
+        }
+        else if (roomObjects[doorID].power <= heroPower){
+        // heroPower += roomObjects[doorID].power
+            let line1 =  `*За дверью оказался монстр.`
+            let line2 = `*К счастью, вы сильнее, чем он.`
+            let line3 = `*Вы одолели монстра. Ваша сила увеличена на ` + roomObjects[doorID].power+"."
+            printText(line1, line2, line3);
+        }
+    }
+}
+
 
 function handleClick(e){
     if (!inBattle) {
-        if(doorClick(e) !== undefined){
-            if (doorClick(e).isDoor == true){
-                drawBattleRoom(doorClick(e).doorID)
+        if(clickedDoorID(e) !== undefined){
+            if (clickedDoorID(e).isDoor == true){
+                drawBattleRoom(clickedDoorID(e).doorID)
+                inBattle = true;
+                battle(clickedDoorID(e).doorID)
+                // testFunction();
             }
-            // console.log(doorClick(e))
         }
     }
 }
 
 //autoexec
 generateRooms();
-document.addEventListener("click", (e) => {
-    handleClick(e);
-})
+document.addEventListener("click", (e) => handleClick(e))
 
 function sleep(ms){
     let start = Date.now();

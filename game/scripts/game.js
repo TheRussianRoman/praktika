@@ -10,6 +10,9 @@ var roomMonster = new Image();
 var knight = new Image();
 var rock = new Image();
 var textBg = new Image();
+var goBackButton = new Image();
+var restartButton = new Image();
+var fullBlackBg = new Image();
 
 //loading images
 monster.src = "img/monster.png";
@@ -18,6 +21,9 @@ knight.src = "img/knight.png";
 battleRoom.src = "img/battleRoom.png";
 rock.src = "img/roomRock.png";
 textBg.src = "img/textBg.png";
+goBackButton.src = "img/goBackButton.png";
+restartButton.src = "img/restartButton.png";
+fullBlackBg.src = "img/fullBlackBg.png";
 bg.src = "img/bg2.png"; 
 
 
@@ -32,29 +38,41 @@ function drawDefaultRoom(){
 function drawBattleRoom(roomID){
     clearCvs();
     ctx.drawImage(battleRoom, 0, 0)
+    ctx.drawImage(textBg, 0, 650)
     if (roomObjects[roomID].objectID == "monster"){
         ctx.drawImage(roomMonster, (cvs.clientWidth-roomMonster.width)/2, (cvs.clientHeight-roomMonster.height)/2+50)
+        drawGoBackButton();
     }
     else if (roomObjects[roomID].objectID == "rock"){
         ctx.drawImage(rock, (cvs.clientWidth-rock.width)/2, (cvs.clientHeight-rock.height)/2+50)
+        drawGoBackButton();
     }
+    
 }
 
+function showGameOverScreen(){
+    ctx.drawImage(fullBlackBg, 0, 0)
+    ctx.drawImage(restartButton, (cvs.clientWidth-restartButton.width)/2, (cvs.clientHeight-restartButton.height)/2)
+}
+
+function drawGoBackButton(){
+    console.log("drawingButton")
+    ctx.drawImage(goBackButton, cvs.clientWidth-goBackButton.width,  cvs.clientHeight-goBackButton.height)
+}
 
 function printText(line1, line2, line3){
     ctx.font = '20px "Comic Sans MS", "Comic Sans", cursive';
     ctx.fillStyle = "white"
-    ctx.drawImage(textBg, 0, 650)
 
     ctx.fillText(line1, 50, 680)
     ctx.fillText(line2, 50, 710)
     ctx.fillText(line3, 50, 740)
 }
 
-function testFunction(){
+// function testFunction(){
     
-    ctx.fillText(`Это монстр!`, 10, 50)
-}
+//     ctx.fillText(`Это монстр!`, 10, 50)
+// }
 
 function clearCvs () {
     ctx.clearRect(0,0,cvs.width,cvs.height);
@@ -68,7 +86,7 @@ bg.onload = drawDefaultRoom;
 let heroPower = 25;
 let roomObjects = new Array;
 let inBattle = false;
-
+let gameOver = false;
 
 //Сейчас кнопка двери не совпадает с размерами самой двери.
 //Можно сделать более точную кнопку.
@@ -187,13 +205,24 @@ function clickedDoorID(e){
             (e.pageY >= doorCoords[i].yStart) &&
             (e.pageX <= doorCoords[i].xEnd) &&
             (e.pageY <= doorCoords[i].yEnd)
-        ) return {
-            isDoor: true,
-            doorID: i
-        };
+        ) return i
     }
 }
 
+function clickedOnGoBackButton(e) {
+    if (
+        (e.pageX >= cvs.width-goBackButton.width) &&
+        (e.pageX <= cvs.width) &&
+        (e.pageY >= cvs.height-goBackButton.height) &&
+        (e.pageY <= cvs.height)
+        ) return true;
+}
+
+function onGoBackButtonClick() {
+    clearCvs();
+    drawDefaultRoom();
+    inBattle = false;
+}
 
 function battle(doorID){
     if (roomObjects[doorID].objectID == "rock") {
@@ -209,7 +238,7 @@ function battle(doorID){
             let line2 = `*Монстр выглядит сильнее вас.`
             let line3 = `*Вы не смогли одолеть монстра. Игра окончена.`
             printText(line1, line2, line3);
-
+            gameOver = true;
             //Добавь проверку конца игры
         }
         else if (roomObjects[doorID].power <= heroPower){
@@ -220,18 +249,24 @@ function battle(doorID){
             printText(line1, line2, line3);
         }
     }
+
+    
 }
 
 
+
 function handleClick(e){
-    if (!inBattle) {
+    if (gameOver){
+        showGameOverScreen()
+    } else if (!inBattle) {
         if(clickedDoorID(e) !== undefined){
-            if (clickedDoorID(e).isDoor == true){
-                drawBattleRoom(clickedDoorID(e).doorID)
+                drawBattleRoom(clickedDoorID(e))
                 inBattle = true;
-                battle(clickedDoorID(e).doorID)
-                // testFunction();
-            }
+                battle(clickedDoorID(e))
+        }
+    } else if (inBattle) {
+        if  (clickedOnGoBackButton(e)) {
+            onGoBackButtonClick()
         }
     }
 }

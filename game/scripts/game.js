@@ -240,7 +240,7 @@ function generateRooms(){
 }
 
 function spawnMonster(){
-    let monsterPower = Math.floor(Math.random()*10+1)
+    let monsterPower = Math.floor(Math.random()*65+1)+35
     let monster = {
         objectID: "monster",
         power: monsterPower

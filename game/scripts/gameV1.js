@@ -1,7 +1,6 @@
 //loading cvs
 const cvs = document.getElementById("canvas")
 const ctx = cvs.getContext('2d');
-var knightPos = {};
 
 //creating images
 var bg = new Image();
@@ -32,26 +31,15 @@ bg.src = "img/bg2.png";
 
 
 //canvas code
-function autoexec(){
-    knightPos.X = (cvs.clientWidth-knight.width)/2
-    knightPos.Y = (cvs.clientHeight-knight.height)/2
-    drawDefaultRoom();
-    drawHeroPower(heroPower);
-}
-
-
 function drawDefaultRoom(){
     clearCvs();
     ctx.drawImage(bg,0,0);
-    ctx.drawImage(knight, knightPos.X, knightPos.Y);
-}
-
-function drawHeroPowerInRoom(){
+    ctx.drawImage(knight,(cvs.clientWidth-knight.width)/2, (cvs.clientHeight-knight.height)/2);
     drawHeroPower(heroPower);
 }
 
 function drawBattleRoom(roomID){
-    // clearCvs();
+    clearCvs();
     ctx.drawImage(battleRoom, 0, 0)
     ctx.drawImage(textBg, 0, 650)
     if (roomObjects[roomID].objectID == "monster"){
@@ -90,7 +78,7 @@ function drawHeroPower(power){
     ctx.font = '30px "Comic Sans MS", "Comic Sans", cursive';
     ctx.fillStyle = "lightgreen";
     ctx.textAlign = "center";
-    ctx.fillText("Сила: " + power, knightPos.X+85, knightPos.Y-20);
+    ctx.fillText("Сила: " + power, cvs.width/2, cvs.height/2-100);
 }
 
 function printRockText(line1, line2, line3){
@@ -128,51 +116,18 @@ function printText(line1, line2, line3, line4, color){
     ctx.fillText(line4, 50, 770)
 }
 
-//Нажал на дверь? True - двигаешься к точке нажатия, потом заходишь в комнату. False? Не двигаешься
-function moveKnight(targetPos){
-    let totalSteps = 20;
-    let delta = {
-        X: Math.abs(knightPos.X - targetPos.X),
-        Y: Math.abs(knightPos.Y - targetPos.Y)
-    }
 
-    let stepLength = {
-        X: (delta.X/totalSteps),
-        Y: (delta.Y/totalSteps)
-    }
-
-    let stepCounter = 0;
-    let animationMoveKnight = setInterval(() => { 
-        if (knightPos.X <= targetPos.X) {
-            knightPos.X += stepLength.X;
-        }
-        if (knightPos.X > targetPos.X){
-            knightPos.X -= stepLength.X;
-        }
-
-        if (knightPos.Y <= targetPos.Y){
-            knightPos.Y += stepLength.Y;
-        }
-        if (knightPos.Y > targetPos.Y){
-            knightPos.Y -= stepLength.Y;
-        }
-        // debugger
-        drawDefaultRoom();
-        console.log("moving knight")
-        ctx.drawImage(knight, knightPos.X, knightPos.Y);
-        drawHeroPower(heroPower)
-        stepCounter++;
-
-        if (stepCounter == totalSteps) clearInterval(animationMoveKnight);
-    }, 0.06)
-}
+// function testFunction(){
+    
+//     ctx.fillText(`Это монстр!`, 10, 50)
+// }
 
 function clearCvs () {
     ctx.clearRect(0,0,cvs.width,cvs.height);
 }
 
 //autoexec
-bg.onload = autoexec;
+bg.onload = drawDefaultRoom;
 
 //JS CODE
 //default JS settings
@@ -257,15 +212,15 @@ doorCoords.push({
     yEnd: 165
 })
 
+
 function restart(){
+    clearCvs();
+    drawDefaultRoom();
     heroPower = 25;
     roomObjects = new Array;
     inBattle = false;
     gameOver = 0;
-    userScore = 0;
-    clearCvs();
-    drawDefaultRoom();
-    drawHeroPower(heroPower);
+    userScrore = 0;
     generateRooms();
 }
 
@@ -335,7 +290,6 @@ function clickedOnRestartButton(e){
 function onGoBackButtonClick() {
     clearCvs();
     drawDefaultRoom();
-    drawHeroPower(heroPower);
     inBattle = false;
 }
 
@@ -357,6 +311,7 @@ function battle(doorID){
             let line4 = `*Вы не смогли одолеть монстра. Игра окончена.`
             printText(line1, line2, line3, line4, "red");
             gameOver = 1;
+            //Добавь проверку конца игры
         }
         else if (roomObjects[doorID].power <= heroPower){
             heroPower += 10

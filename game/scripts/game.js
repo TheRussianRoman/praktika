@@ -146,8 +146,8 @@ function moveKnight(targetPos){
     knightMoveAnimStopped = 0;
     let totalSteps = 100;
     let delta = {
-        X: Math.abs(knightPos.X - targetPos.pageX),
-        Y: Math.abs(knightPos.Y - targetPos.pageY)
+        X: Math.abs((knightPos.X + knight.width/2) - targetPos.pageX),
+        Y: Math.abs((knightPos.Y + knight.height/2) - targetPos.pageY)
     }
 
     let stepLength = {
@@ -157,17 +157,17 @@ function moveKnight(targetPos){
 
     let stepCounter = 0;
     let animationMoveKnight = setInterval(() => { 
-        if (knightPos.X <= targetPos.pageX) {
+        if ((knightPos.X + knight.width/2) <= targetPos.pageX) {
             knightPos.X += stepLength.X;
         }
-        if (knightPos.X > targetPos.pageX){
+        if ((knightPos.X + knight.width/2) > targetPos.pageX){
             knightPos.X -= stepLength.X;
         }
 
-        if (knightPos.Y <= targetPos.pageY){
+        if ((knightPos.Y + knight.height/2) <= targetPos.pageY){
             knightPos.Y += stepLength.Y;
         }
-        if (knightPos.Y > targetPos.pageY){
+        if ((knightPos.Y + knight.height/2) > targetPos.pageY){
             knightPos.Y -= stepLength.Y;
         }
         // debugger

@@ -1,8 +1,18 @@
+//globals
+var knightPos = {};
+let knightMoveAnimStopped = 0;
+let mouseClickAllowed = true;
+//default JS settings
+let heroPower = 25;
+let roomObjects = new Array;
+let inBattle = false;
+let gameOver = 0;
+let playerScore = 0; //счётчик прошедших комнат, если 10 - победа.
+
+
 //loading cvs
 const cvs = document.getElementById("canvas")
 const ctx = cvs.getContext('2d');
-var knightPos = {};
-let knightMoveAnimStopped = 0;
 
 //creating images
 var bg = new Image();
@@ -170,7 +180,7 @@ function moveKnight(targetPos){
             clearInterval(animationMoveKnight);
             knightMoveAnimStopped = 1;
         }
-    }, 25)
+    }, 5)
 }
 
 function clearCvs () {
@@ -180,14 +190,8 @@ function clearCvs () {
 //autoexec
 bg.onload = autoexec;
 
-//JS CODE
-//default JS settings
-let heroPower = 25;
-let roomObjects = new Array;
-let inBattle = false;
-let gameOver = 0;
-let playerScore = 0; //счётчик прошедших комнат, если 10 - победа.
 
+//JS CODE
 //Сейчас кнопка двери не совпадает с размерами самой двери.
 //Можно сделать более точную кнопку.
 //Но это дольше
@@ -403,20 +407,24 @@ function handleClick(e){
         showWinnerScreen();
     } else if (!inBattle) {
         if(clickedDoorID(e) !== undefined){
-            moveKnight(e);
-            let checkIfKnightStopped = setInterval(() => {
-                if (knightMoveAnimStopped == 1){
-                    drawBattleRoom(clickedDoorID(e))
-                    inBattle = true;
-                    battle(clickedDoorID(e));
-                    clearInterval(checkIfKnightStopped)
-                }
-            }, 10)
+            if(mouseClickAllowed){
+                mouseClickAllowed = false;
+                setTimeout(() => mouseClickAllowed = true, 1500)
+                moveKnight(e);
+                let checkIfKnightStopped = setInterval(() => {
+                    if (knightMoveAnimStopped == 1){
+                        drawBattleRoom(clickedDoorID(e))
+                        inBattle = true;
+                        battle(clickedDoorID(e));
+                        clearInterval(checkIfKnightStopped)
+                    }
+                }, 10)
+            }
         }
-    } else if (inBattle) {
-        if  (clickedOnGoBackButton(e)) {
-            onGoBackButtonClick()
-        }
+        } else if (inBattle) {
+            if  (clickedOnGoBackButton(e)) {
+                onGoBackButtonClick()
+            }
     } 
     }
 

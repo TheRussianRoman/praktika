@@ -2,7 +2,7 @@
 const cvs = document.getElementById("canvas")
 const ctx = cvs.getContext('2d');
 var knightPos = {};
-let moveKnightAnimEndlessLoop = 0;
+let knightMoveAnimStopped = 0;
 
 //creating images
 var bg = new Image();
@@ -133,8 +133,8 @@ function printText(line1, line2, line3, line4, color){
 
 //Нажал на дверь? True - двигаешься к точке нажатия, потом заходишь в комнату. False? Не двигаешься
 function moveKnight(targetPos){
-    moveKnightAnimEndlessLoop = 0;
-    let totalSteps = 20;
+    knightMoveAnimStopped = 0;
+    let totalSteps = 100;
     let delta = {
         X: Math.abs(knightPos.X - targetPos.pageX),
         Y: Math.abs(knightPos.Y - targetPos.pageY)
@@ -147,17 +147,17 @@ function moveKnight(targetPos){
 
     let stepCounter = 0;
     let animationMoveKnight = setInterval(() => { 
-        if (knightPos.X <= targetPos.X) {
+        if (knightPos.X <= targetPos.pageX) {
             knightPos.X += stepLength.X;
         }
-        if (knightPos.X > targetPos.X){
+        if (knightPos.X > targetPos.pageX){
             knightPos.X -= stepLength.X;
         }
 
-        if (knightPos.Y <= targetPos.Y){
+        if (knightPos.Y <= targetPos.pageY){
             knightPos.Y += stepLength.Y;
         }
-        if (knightPos.Y > targetPos.Y){
+        if (knightPos.Y > targetPos.pageY){
             knightPos.Y -= stepLength.Y;
         }
         // debugger
@@ -166,12 +166,11 @@ function moveKnight(targetPos){
         ctx.drawImage(knight, knightPos.X, knightPos.Y);
         drawHeroPower(heroPower)
         stepCounter++;
-
         if (stepCounter == totalSteps) {
             clearInterval(animationMoveKnight);
-            moveKnightAnimEndlessLoop = 1;
+            knightMoveAnimStopped = 1;
         }
-    }, 0.06)
+    }, 25)
 }
 
 function clearCvs () {
@@ -404,10 +403,15 @@ function handleClick(e){
         showWinnerScreen();
     } else if (!inBattle) {
         if(clickedDoorID(e) !== undefined){
-            
-            drawBattleRoom(clickedDoorID(e))
-            inBattle = true;
-            battle(clickedDoorID(e))
+            moveKnight(e);
+            let checkIfKnightStopped = setInterval(() => {
+                if (knightMoveAnimStopped == 1){
+                    drawBattleRoom(clickedDoorID(e))
+                    inBattle = true;
+                    battle(clickedDoorID(e));
+                    clearInterval(checkIfKnightStopped)
+                }
+            }, 10)
         }
     } else if (inBattle) {
         if  (clickedOnGoBackButton(e)) {

@@ -2,6 +2,7 @@
 const cvs = document.getElementById("canvas")
 const ctx = cvs.getContext('2d');
 var knightPos = {};
+let moveKnightAnimEndlessLoop = 0;
 
 //creating images
 var bg = new Image();
@@ -39,6 +40,10 @@ function autoexec(){
     drawHeroPower(heroPower);
 }
 
+function resetKnightPosition(){
+    knightPos.X = (cvs.clientWidth-knight.width)/2
+    knightPos.Y = (cvs.clientHeight-knight.height)/2
+}
 
 function drawDefaultRoom(){
     clearCvs();
@@ -51,7 +56,6 @@ function drawHeroPowerInRoom(){
 }
 
 function drawBattleRoom(roomID){
-    // clearCvs();
     ctx.drawImage(battleRoom, 0, 0)
     ctx.drawImage(textBg, 0, 650)
     if (roomObjects[roomID].objectID == "monster"){
@@ -75,7 +79,6 @@ function showWinnerScreen(){
 }
 
 function drawGoBackButton(){
-    console.log("drawingButton")
     ctx.drawImage(goBackButton, cvs.clientWidth-goBackButton.width,  cvs.clientHeight-goBackButton.height)
 }
 
@@ -130,10 +133,11 @@ function printText(line1, line2, line3, line4, color){
 
 //Нажал на дверь? True - двигаешься к точке нажатия, потом заходишь в комнату. False? Не двигаешься
 function moveKnight(targetPos){
+    moveKnightAnimEndlessLoop = 0;
     let totalSteps = 20;
     let delta = {
-        X: Math.abs(knightPos.X - targetPos.X),
-        Y: Math.abs(knightPos.Y - targetPos.Y)
+        X: Math.abs(knightPos.X - targetPos.pageX),
+        Y: Math.abs(knightPos.Y - targetPos.pageY)
     }
 
     let stepLength = {
@@ -163,7 +167,10 @@ function moveKnight(targetPos){
         drawHeroPower(heroPower)
         stepCounter++;
 
-        if (stepCounter == totalSteps) clearInterval(animationMoveKnight);
+        if (stepCounter == totalSteps) {
+            clearInterval(animationMoveKnight);
+            moveKnightAnimEndlessLoop = 1;
+        }
     }, 0.06)
 }
 
@@ -263,6 +270,7 @@ function restart(){
     inBattle = false;
     gameOver = 0;
     userScore = 0;
+    resetKnightPosition();
     clearCvs();
     drawDefaultRoom();
     drawHeroPower(heroPower);
@@ -310,7 +318,9 @@ function clickedDoorID(e){
             (e.pageY >= doorCoords[i].yStart) &&
             (e.pageX <= doorCoords[i].xEnd) &&
             (e.pageY <= doorCoords[i].yEnd)
-        ) return i
+        ) {
+            return i
+        }
     }
 }
 
@@ -334,6 +344,7 @@ function clickedOnRestartButton(e){
 
 function onGoBackButtonClick() {
     clearCvs();
+    resetKnightPosition()
     drawDefaultRoom();
     drawHeroPower(heroPower);
     inBattle = false;
@@ -380,10 +391,10 @@ function battle(doorID){
 
 
 function handleClick(e){
-    if (gameOver == 1) {
+    if (gameOver == 1) {    
         showGameOverScreen();
         gameOver = 2;
-    } else if (gameOver == 2) {
+    } else if (gameOver == 2) { 
         if (clickedOnRestartButton(e)){
         console.log("restarting...")
             restart();
@@ -393,9 +404,10 @@ function handleClick(e){
         showWinnerScreen();
     } else if (!inBattle) {
         if(clickedDoorID(e) !== undefined){
-                drawBattleRoom(clickedDoorID(e))
-                inBattle = true;
-                battle(clickedDoorID(e))
+            
+            drawBattleRoom(clickedDoorID(e))
+            inBattle = true;
+            battle(clickedDoorID(e))
         }
     } else if (inBattle) {
         if  (clickedOnGoBackButton(e)) {

@@ -141,7 +141,6 @@ function printText(line1, line2, line3, line4, color){
     ctx.fillText(line4, 50, 770)
 }
 
-//Нажал на дверь? True - двигаешься к точке нажатия, потом заходишь в комнату. False? Не двигаешься
 function moveKnight(targetPos){
     knightMoveAnimStopped = 0;
     let totalSteps = 100;

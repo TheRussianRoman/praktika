@@ -3,6 +3,6 @@ let yPos = document.getElementById("yPos")
 
 document.addEventListener("click", (e) => {
     // console.clear()
-    console.log(e.pageX);
-    console.log(e.pageY);
+    console.log("x = " + e.pageX);
+    console.log("y = " + e.pageY);
 })

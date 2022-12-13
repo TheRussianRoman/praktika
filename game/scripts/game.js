@@ -2,6 +2,7 @@
 var knightPos = {};
 let knightMoveAnimStopped = 0;
 let mouseClickAllowed = true;
+
 //default JS settings
 let heroPower = 25;
 let roomObjects = new Array;
@@ -26,6 +27,8 @@ var goBackButton = new Image();
 var restartButton = new Image();
 var fullBlackBg = new Image();
 var winnerScreen = new Image();
+var blackSquare = new Image();
+
 
 //loading images
 monster.src = "img/monster.png";
@@ -37,6 +40,7 @@ textBg.src = "img/textBg.png";
 goBackButton.src = "img/goBackButton.png";
 restartButton.src = "img/restartButton.png";
 fullBlackBg.src = "img/fullBlackBg.png";
+blackSquare.src = "img/fullBlackBg.png";
 winnerScreen.src = "img/winnerScreen.png";
 bg.src = "img/bg2.png"; 
 
@@ -169,7 +173,6 @@ function moveKnight(targetPos){
         if ((knightPos.Y + knight.height/2) > targetPos.pageY){
             knightPos.Y -= stepLength.Y;
         }
-        // debugger
         drawDefaultRoom();
         console.log("moving knight")
         ctx.drawImage(knight, knightPos.X, knightPos.Y);
@@ -180,6 +183,10 @@ function moveKnight(targetPos){
             knightMoveAnimStopped = 1;
         }
     }, 5)
+}
+
+function leavingMainRoomAnim(){
+    
 }
 
 function clearCvs () {
@@ -358,7 +365,6 @@ function battle(doorID){
         let line1 = `*За дверью оказался древний артефакт.`
         let line2 = `*Вы подобрали артефакт.`
         let line3 = `*Ваша сила увеличена на ` + roomObjects[doorID].power+"."
-        let line4 = ""
         printRockText(line1, line2, line3);
         playerScore+=1;
     }
@@ -402,11 +408,9 @@ function handleClick(e){
             restart();
         }
     } else if (playerScore == 10) {
-        console.log("playerWon")
         showWinnerScreen();
     } else if (!inBattle) {
-        if(clickedDoorID(e) !== undefined){
-            if(mouseClickAllowed){
+        if((clickedDoorID(e) !== undefined) && mouseClickAllowed){
                 mouseClickAllowed = false;
                 setTimeout(() => mouseClickAllowed = true, 1500)
                 moveKnight(e);
@@ -418,18 +422,18 @@ function handleClick(e){
                         clearInterval(checkIfKnightStopped)
                     }
                 }, 10)
-            }
         }
         } else if (inBattle) {
             if  (clickedOnGoBackButton(e)) {
                 onGoBackButtonClick()
             }
     } 
-    }
+}
 
 //autoexec
 generateRooms();
 document.addEventListener("click", (e) => handleClick(e))
+
 
 function sleep(ms){
     let start = Date.now();
